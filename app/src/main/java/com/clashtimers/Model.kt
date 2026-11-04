@@ -1,0 +1,134 @@
+package com.clashtimers
+
+import org.json.JSONArray
+import org.json.JSONObject
+
+/** Widget sections, in display order. */
+enum class Group { BUILDERS, LAB, PETS, BUILDER_BASE }
+
+enum class Kind(val group: Group) {
+    BUILDING(Group.BUILDERS),
+    TRAP(Group.BUILDERS),
+    HERO(Group.BUILDERS),
+    GUARDIAN(Group.BUILDERS),
+    TROOP(Group.LAB),
+    SIEGE(Group.LAB),
+    SPELL(Group.LAB),
+    PET(Group.PETS),
+    BB_BUILDING(Group.BUILDER_BASE),
+    BB_TRAP(Group.BUILDER_BASE),
+    BB_HERO(Group.BUILDER_BASE),
+    BB_TROOP(Group.BUILDER_BASE),
+}
+
+/** One running upgrade. Times are epoch millis; [startAt] only drives the progress bar. */
+data class Upgrade(
+    val id: Int,
+    val kind: Kind,
+    val name: String,
+    /** Level the upgrade ends on, or a supercharge tier like "⚡2". */
+    val target: String,
+    val goblin: Boolean,
+    val startAt: Long,
+    val finishAt: Long,
+) {
+    fun sameUpgradeAs(other: Upgrade) =
+        id == other.id && kind == other.kind && target == other.target && goblin == other.goblin
+
+    fun progress(now: Long): Float {
+        val span = finishAt - startAt
+        if (span <= 0) return 1f
+        return ((now - startAt).toFloat() / span).coerceIn(0f, 1f)
+    }
+
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id)
+        .put("kind", kind.name)
+        .put("name", name)
+        .put("target", target)
+        .put("goblin", goblin)
+        .put("start", startAt)
+        .put("finish", finishAt)
+
+    companion object {
+        fun fromJson(o: JSONObject) = Upgrade(
+            id = o.getInt("id"),
+            kind = Kind.valueOf(o.getString("kind")),
+            name = o.getString("name"),
+            target = o.getString("target"),
+            goblin = o.optBoolean("goblin"),
+            startAt = o.getLong("start"),
+            finishAt = o.getLong("finish"),
+        )
+    }
+}
+
+/** A potion window: [group] works [multiplier]x faster from [startAt] until [endsAt]. */
+data class Boost(val group: Group, val multiplier: Int, val startAt: Long, val endsAt: Long) {
+    fun isActive(now: Long) = now in startAt until endsAt
+
+    fun toJson(): JSONObject = JSONObject()
+        .put("group", group.name)
+        .put("x", multiplier)
+        .put("start", startAt)
+        .put("end", endsAt)
+
+    companion object {
+        fun fromJson(o: JSONObject) = Boost(
+            group = Group.valueOf(o.getString("group")),
+            multiplier = o.getInt("x"),
+            startAt = o.getLong("start"),
+            endsAt = o.getLong("end"),
+        )
+    }
+}
+
+data class Village(
+    val tag: String,
+    val townHall: Int,
+    val homeBuilders: Int,
+    val hasLab: Boolean,
+    val hasPetHouse: Boolean,
+    val hasBuilderBase: Boolean,
+    val exportedAt: Long,
+    val upgrades: List<Upgrade>,
+    val boosts: List<Boost>,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("tag", tag)
+        .put("th", townHall)
+        .put("builders", homeBuilders)
+        .put("lab", hasLab)
+        .put("petHouse", hasPetHouse)
+        .put("builderBase", hasBuilderBase)
+        .put("exportedAt", exportedAt)
+        .put("upgrades", JSONArray(upgrades.map { it.toJson() }))
+        .put("boosts", JSONArray(boosts.map { it.toJson() }))
+
+    companion object {
+        fun fromJson(o: JSONObject) = Village(
+            tag = o.optString("tag"),
+            townHall = o.optInt("th"),
+            homeBuilders = o.optInt("builders", 5),
+            hasLab = o.optBoolean("lab"),
+            hasPetHouse = o.optBoolean("petHouse"),
+            hasBuilderBase = o.optBoolean("builderBase"),
+            exportedAt = o.getLong("exportedAt"),
+            upgrades = o.optJSONArray("upgrades")?.mapObjects(Upgrade::fromJson) ?: emptyList(),
+            boosts = o.optJSONArray("boosts")?.mapObjects(Boost::fromJson) ?: emptyList(),
+        )
+    }
+}
+
+internal inline fun JSONArray.forEachObject(action: (JSONObject) -> Unit) {
+    for (i in 0 until length()) {
+        val o = optJSONObject(i) ?: continue
+        action(o)
+    }
+}
+
+internal fun <T> JSONArray.mapObjects(transform: (JSONObject) -> T): List<T> {
+    val out = ArrayList<T>(length())
+    forEachObject { out += transform(it) }
+    return out
+}

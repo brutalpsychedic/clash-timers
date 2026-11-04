@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- cart wheel: rim, spokes, hub -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M3,12a9,9 0,1 0,18 0a9,9 0,1 0,-18 0zM5.8,12a6.2,6.2 0,1 0,12.4 0a6.2,6.2 0,1 0,-12.4 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11.1,4.5h1.8v15h-1.8zM4.5,11.1h15v1.8h-15z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M9.6,12a2.4,2.4 0,1 0,4.8 0a2.4,2.4 0,1 0,-4.8 0z" />
+</vector>

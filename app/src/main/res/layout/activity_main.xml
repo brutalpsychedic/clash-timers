@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_bg"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/gold"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/widget_bg"
+            android:lineSpacingExtra="3dp"
+            android:padding="14dp"
+            android:textColor="@color/text_body"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/sync"
+            style="@style/AppButton.Primary"
+            android:layout_marginTop="14dp"
+            android:text="@string/sync_from_clipboard" />
+
+        <Button
+            android:id="@+id/open_game"
+            style="@style/AppButton"
+            android:text="@string/open_game" />
+
+        <TextView
+            style="@style/AppLabel"
+            android:text="@string/name_label" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/player_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/name_hint"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:maxLength="24"
+                android:textColor="@color/text_light"
+                android:textColorHint="@color/text_muted" />
+
+            <Button
+                android:id="@+id/save_name"
+                style="@style/AppButton"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:text="@string/save" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/AppLabel"
+            android:text="@string/potions_label" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/potion_builder"
+                style="@style/AppButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/potion_builder" />
+
+            <Button
+                android:id="@+id/potion_research"
+                style="@style/AppButton"
+                android:layout_width="0dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="@string/potion_research" />
+
+            <Button
+                android:id="@+id/potion_pet"
+                style="@style/AppButton"
+                android:layout_width="0dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="@string/potion_pet" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/clear_potions"
+            style="@style/AppButton"
+            android:text="@string/clear_potions" />
+
+        <TextView
+            style="@style/AppLabel"
+            android:text="@string/widget_label" />
+
+        <Switch
+            android:id="@+id/show_builder_base"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/show_builder_base"
+            android:textColor="@color/text_body"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/add_widget"
+            style="@style/AppButton"
+            android:text="@string/add_widget" />
+
+        <Button
+            android:id="@+id/exact_alarms"
+            style="@style/AppButton"
+            android:text="@string/exact_alarms"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/exact_alarms_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/exact_alarms_hint"
+            android:visibility="gone"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp" />
+
+        <TextView
+            style="@style/AppLabel"
+            android:text="@string/how_to_title" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/how_to"
+            android:textColor="@color/text_body"
+            android:textSize="14sp" />
+    </LinearLayout>
+</ScrollView>

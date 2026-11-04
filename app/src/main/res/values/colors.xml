@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="panel">#FF4B3828</color>
+    <color name="panel_edge">#FF2E2117</color>
+    <color name="track">#FF2A1E15</color>
+    <color name="app_bg">#FF2B1F16</color>
+    <color name="gold">#FFF5B942</color>
+    <color name="gold_dark">#FF3A2508</color>
+    <color name="goblin_green">#FF8BD45A</color>
+    <color name="idle_amber">#FFFFB74D</color>
+    <color name="text_light">#FFFFFFFF</color>
+    <color name="text_body">#FFE8DCCB</color>
+    <color name="text_muted">#FFB9A58E</color>
+</resources>

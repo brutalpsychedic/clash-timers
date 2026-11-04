@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Clash Timers</string>
+    <string name="widget_description">Builder, lab, hero and pet upgrade countdowns</string>
+
+    <!-- Widget -->
+    <string name="sync">Sync</string>
+    <string name="th_level">TH%1$d</string>
+    <string name="section_builders">BUILDERS %1$d/%2$d</string>
+    <string name="section_lab">LAB</string>
+    <string name="section_pets">PETS</string>
+    <string name="section_builder_base">BUILDER BASE</string>
+    <string name="goblin_suffix">" + Goblin"</string>
+    <string name="goblin_badge">GOBLIN</string>
+    <string name="ready">Ready!</string>
+    <plurals name="builders_idle">
+        <item quantity="one">💤 %d builder idle</item>
+        <item quantity="other">💤 %d builders idle</item>
+    </plurals>
+    <string name="lab_idle">💤 Laboratory idle</string>
+    <string name="pets_idle">💤 Pet House idle</string>
+    <string name="builder_base_idle">💤 Builder Base idle</string>
+    <string name="widget_empty">In Clash: Settings › More Settings › Data Export › Copy.\nThen tap Sync.</string>
+    <string name="exported">Exported %1$s</string>
+    <string name="exported_with_done">%1$s · %2$d done</string>
+
+    <!-- Sync -->
+    <string name="synced">Synced · %1$d upgrades running</string>
+    <string name="no_new_export">No new export copied. In Clash: Settings › More Settings › Data Export › Copy</string>
+    <string name="clipboard_empty">Clipboard has no village export yet. Copy one from Clash first.</string>
+    <string name="export_unreadable">Couldn\'t read that export</string>
+    <string name="clash_missing">Clash of Clans isn\'t installed</string>
+
+    <!-- App screen -->
+    <string name="status_empty">No village yet.\nExport it from Clash, then tap Sync from clipboard.</string>
+    <string name="status_village">TH%1$d · %2$s</string>
+    <plurals name="status_running">
+        <item quantity="one">%d upgrade running</item>
+        <item quantity="other">%d upgrades running</item>
+    </plurals>
+    <string name="status_boost">%1$s potion ×%2$d · %3$d min left</string>
+    <string name="name_label">Name shown on the widget</string>
+    <string name="name_hint">Your in-game name</string>
+    <string name="save">Save</string>
+    <string name="name_saved">Name saved</string>
+    <string name="sync_from_clipboard">Sync from clipboard</string>
+    <string name="open_game">Open Clash of Clans</string>
+    <string name="potions_label">Potions — logs a 1-hour boost from now</string>
+    <string name="potion_builder">Builder ×10</string>
+    <string name="potion_research">Research ×24</string>
+    <string name="potion_pet">Pet ×24</string>
+    <string name="potion_logged">%1$s logged for 1 hour</string>
+    <string name="clear_potions">Clear potions</string>
+    <string name="sync_first">Sync your village first</string>
+    <string name="widget_label">Widget</string>
+    <string name="show_builder_base">Show Builder Base on the widget</string>
+    <string name="add_widget">Add widget to home screen</string>
+    <string name="add_widget_manual">Long-press your home screen › Widgets › Clash Timers</string>
+    <string name="exact_alarms">Allow exact countdowns</string>
+    <string name="exact_alarms_hint">Without this, timers over a day show as \"2d 14h\" instead of ticking seconds.</string>
+    <string name="how_to_title">How syncing works</string>
+    <string name="how_to">1. In Clash of Clans open Settings › More Settings › Data Export and tap Copy.\n2. Tap Sync on the widget (or Sync from clipboard here).\n3. Re-export whenever you start, finish or speed up an upgrade.\n\nTap Sync with no new export copied and it opens the game for you. Tap any row to open the game.\n\nThe game doesn\'t say when you drink a potion, so log it here to keep the countdowns right.</string>
+</resources>

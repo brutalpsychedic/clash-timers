@@ -1,0 +1,11 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+
+# Signing key stays on your machine.
+keystore/
+*.jks
+*.keystore

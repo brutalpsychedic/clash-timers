@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/panel</item>
+        <item name="android:colorAccent">@color/gold</item>
+        <item name="android:windowBackground">@color/app_bg</item>
+        <item name="android:statusBarColor">@color/app_bg</item>
+        <item name="android:navigationBarColor">@color/app_bg</item>
+    </style>
+
+    <style name="SyncTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <!-- Widget text: white, bold, with the drop shadow that keeps it readable on the green bars. -->
+    <style name="WidgetText">
+        <item name="android:textColor">@color/text_light</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">#CC000000</item>
+        <item name="android:shadowDy">1.5</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="WidgetRowText" parent="WidgetText">
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="AppButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:backgroundTint">@color/panel</item>
+        <item name="android:textColor">@color/text_light</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="AppButton.Primary">
+        <item name="android:backgroundTint">@color/gold</item>
+        <item name="android:textColor">@color/gold_dark</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">22dp</item>
+        <item name="android:textColor">@color/gold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

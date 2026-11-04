@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/idle_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
+
+    <TextView
+        android:id="@+id/idle_text"
+        style="@style/WidgetRowText"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@drawable/idle_bg"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="10dp"
+        android:textColor="@color/idle_amber"
+        android:textSize="14sp" />
+</FrameLayout>
