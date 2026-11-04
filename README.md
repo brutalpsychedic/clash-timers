@@ -8,7 +8,7 @@ Supercell's public API doesn't expose upgrade timers, so the widget reads the ga
 
 ## Install (sideload)
 
-1. Build the APK (see [Rebuilding](#rebuilding)) and copy it to your phone (USB, Quick Share, Drive…).
+1. On your phone (Android 8.0+), download the latest APK from [**Releases**](https://github.com/brutalpsychedic/clash-timers/releases/latest). Or build it yourself (see [Rebuilding](#rebuilding)) and copy it over.
 2. Open it. Allow "Install unknown apps" for whichever app opened it. If Play Protect warns about an unknown developer, choose **Install anyway**.
 3. Open **Clash Timers**, type your in-game name and tap **Save**. The export has your tag but not your name.
 4. In Clash: **Settings › More Settings › Data Export › Copy**. Back in Clash Timers, tap **Sync from clipboard**.
