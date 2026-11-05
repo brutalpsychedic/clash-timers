@@ -11,8 +11,8 @@ android {
         applicationId = "com.clashtimers"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     // Local key (kept out of git) so every rebuild installs over the previous one.

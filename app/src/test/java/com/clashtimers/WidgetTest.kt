@@ -79,7 +79,56 @@ class WidgetTest {
         val v = ExportParser.parse(oneLess, GameData.get(context), emptyList(), null)
         val items = WidgetItems.build(context.resources, v, true, System.currentTimeMillis())
         assertEquals("BUILDERS 5/6", (items[0] as WidgetItem.Header).title)
-        assertEquals("💤 1 builder idle", (items[1] as WidgetItem.Idle).text)
+        assertTrue(items[1] is WidgetItem.HelperRow) // the Apprentice sits right under the header
+        assertEquals("💤 1 builder idle", (items[2] as WidgetItem.Idle).text)
+    }
+
+    @Test
+    fun helpersFromExport() {
+        val v = parse()
+        val start = exportedAt * 1000
+        val now = System.currentTimeMillis()
+
+        val apprentice = v.helpers.single { it.group == Group.BUILDERS }
+        assertEquals(8, apprentice.level)
+        assertEquals("Royal Champion", apprentice.task)
+        assertEquals(start + 1_800_000, apprentice.workingUntil)
+        assertEquals(Helper.State.WORKING, apprentice.state(now))
+        assertTrue(apprentice.keepAssigned)
+
+        // Half an hour at 1 + 8 = 9x covers 4.5 h of the 223 732 s left; the rest runs at 1x.
+        val champion = v.upgrades.single { it.id == 28000004 }
+        assertTrue(champion.helped)
+        assertEquals(start + (1800 + 223_732 - 1800 * 9) * 1000L, champion.finishAt)
+
+        val assistant = v.helpers.single { it.group == Group.LAB }
+        assertEquals(null, assistant.task)
+        assertEquals(start + 49_617_000, assistant.awakeAt)
+        assertEquals(Helper.State.SLEEPING, assistant.state(now))
+        assertEquals(Helper.State.READY, assistant.state(assistant.awakeAt))
+        assertTrue(v.upgrades.none { it.kind.group == Group.LAB && it.helped })
+
+        // Shift over, work day still running: the Apprentice is asleep.
+        assertEquals(Helper.State.SLEEPING, apprentice.state(apprentice.workingUntil))
+    }
+
+    @Test
+    fun helperStacksWithPotion() {
+        val start = exportedAt * 1000
+        val potion = listOf(Boost(Group.BUILDERS, 10, start, start + HOUR))
+        // 10x potion + level 8 helper = 18x for the shared half hour, then 10x, then 1x.
+        val work = 30 * MINUTE * 18 + 30 * MINUTE * 10 + HOUR
+        assertEquals(start + 2 * HOUR, BoostMath.finishTime(work, start, potion, 8, start + 30 * MINUTE))
+    }
+
+    @Test
+    fun iconsResolvePerLevel() {
+        val icons = IconCache(context)
+        assertTrue(icons.get(1000019, 15) != null)        // Hidden Tesla level 15 art
+        assertTrue(icons.get(1000019, 99) != null)        // past the top level: falls back to the highest
+        assertTrue(icons.get(28000001, 0) != null)        // Archer Queen
+        assertTrue(icons.get(93000000, 0) != null)        // Builder's Apprentice
+        assertEquals(null, icons.get(1000064, 1))         // B.O.B's Hut has no art: glyph fallback
     }
 
     @Test
@@ -137,7 +186,10 @@ class WidgetTest {
         {
           "tag": "#2PP0JYQ8",
           "timestamp": "NOW",
-          "helpers": [{"data": 93000000, "lvl": 8, "helper_cooldown": 49617}],
+          "helpers": [
+            {"data": 93000000, "lvl": 8, "helper_cooldown": 49617},
+            {"data": 93000001, "lvl": 10, "helper_cooldown": 49617}
+          ],
           "buildings": [
             {"data": 1000001, "lvl": 16, "cnt": 1},
             {"data": 1000015, "lvl": 7, "cnt": 5},
@@ -154,7 +206,7 @@ class WidgetTest {
           ],
           "heroes": [
             {"data": 28000000, "lvl": 61, "timer": 7054},
-            {"data": 28000004, "lvl": 44, "timer": 223732}
+            {"data": 28000004, "lvl": 44, "timer": 223732, "helper_timer": 1800, "helper_recurrent": true}
           ],
           "units": [
             {"data": 4000003, "lvl": 10, "timer": 33395},

@@ -1,6 +1,6 @@
 # Clash Timers
 
-Android home-screen widget for Clash of Clans upgrade countdowns. It shows builders (plus the Goblin Builder), lab (plus the Goblin Researcher), heroes, pets and Builder Base. Each row has a live countdown and a progress bar. The header shows your name, Town Hall level and a Sync button.
+Android home-screen widget for Clash of Clans upgrade countdowns. It shows builders (plus the Goblin Builder), lab (plus the Goblin Researcher), heroes, pets and Builder Base. It also shows your Builder's Apprentice and Lab Assistant. Each row has the item's in-game artwork (buildings at the level they're upgrading to), a live countdown and a progress bar. The header shows your name, Town Hall level and a Sync button.
 
 <img src="docs/widget-preview.png" alt="Clash Timers widget showing builder, lab, pet and Builder Base countdowns" width="360">
 
@@ -8,7 +8,7 @@ Supercell's public API doesn't expose upgrade timers, so the widget reads the ga
 
 ## Install (sideload)
 
-1. On your phone (Android 8.0+), download the latest APK from [**Releases**](https://github.com/brutalpsychedic/clash-timers/releases/latest). Or build it yourself (see [Rebuilding](#rebuilding)) and copy it over.
+1. On your phone (Android 8.0+), download the latest APK from [**Releases**](https://github.com/brutalpsychedic/clash-timers/releases/latest). Or build it yourself (see [Rebuilding](#rebuilding)) and copy it over. To update, install the newer APK over the old one; your settings stay.
 2. Open it. Allow "Install unknown apps" for whichever app opened it. If Play Protect warns about an unknown developer, choose **Install anyway**.
 3. Open **Clash Timers**, type your in-game name and tap **Save**. The export has your tag but not your name.
 4. In Clash: **Settings › More Settings › Data Export › Copy**. Back in Clash Timers, tap **Sync from clipboard**.
@@ -21,11 +21,25 @@ Supercell's public API doesn't expose upgrade timers, so the widget reads the ga
 - Tapping any row opens Clash.
 - **Potions**: the export doesn't say when you drink one, so log it in the app (Builder ×10, Research ×24, Pet ×24, 1 hour from now). The builder header shows a `×10 34:44` pill while it runs.
 - `💤 N builders idle`, `Laboratory idle` and `Pet House idle` rows appear when something isn't working.
+- **Helpers**: the Apprentice sits at the top of Builders and the Lab Assistant at the top of Lab, each in a blue row:
+  - `Apprentice → Royal Champion` with a countdown while it works its one-hour shift. The helped upgrade gets a blue **HELPER** tag and finishes sooner: the helper adds its level to the speed, e.g. a level 8 Apprentice makes it 9×, or 18× during a Builder Potion.
+  - `Apprentice · Sleeping` with a moon and a countdown to the next work day once its shift is over.
+  - `Apprentice · Ready to assign` (amber) once it's awake. With "Keep assigned" on, it shows `Apprentice → <upgrade>` marked `Awake` instead.
 - The footer shows when the export was taken, plus `· N done` once upgrades finish (time to collect and re-sync).
 
-## Real icons (optional)
+## Icons and game data
 
-The rows use built-in placeholder glyphs, coloured by category. To use real artwork, put PNG/WebP files named by the export's data id into `app/src/main/assets/icons/` (e.g. `1000019.png` for Hidden Tesla, `28000000.png` for Barbarian King) and rebuild. Ids are listed in `app/src/main/assets/gamedata.json`. Supercell's Fan Content Policy covers personal fan use of game art.
+Row icons are the game's own artwork, bundled in `app/src/main/assets/icons/`. Most items have one `<dataId>.webp`; buildings and traps have one per level, `<dataId>_<level>.webp`. Items with no artwork fall back to a coloured glyph. After a game update, refresh names, upgrade times and icons with:
+
+```
+powershell -ExecutionPolicy Bypass -File tools\update-assets.ps1
+```
+
+It needs a signed-in [GitHub CLI](https://cli.github.com/) (`gh auth login`) to list the icon files, then rebuild.
+
+Icons and game data come from [ClashKing](https://github.com/ClashKingInc/ClashKingAssets) (`assets.clashk.ing`). Upgrade times come from the [coc-rush-helper](https://github.com/mateobaricevic/coc-rush-helper) snapshot of that data.
+
+*This content is not affiliated with, endorsed, sponsored, or specifically approved by Supercell and Supercell is not responsible for it. For more information see [Supercell's Fan Content Policy](https://www.supercell.com/fan-content-policy).*
 
 ## Rebuilding
 
@@ -44,8 +58,9 @@ keytool -genkeypair -keystore keystore/clashtimers.jks -alias clashtimers -keyal
 
 ## Known limits
 
-- **Upgrade durations** (for progress bars) come from a ClashKingAssets snapshot dated 2026-10-12. Anything added to the game later shows as `Item #id`, and its bar starts from the first sync. Regenerate `gamedata.json` to update it.
-- **Potions** assume the export reports un-boosted time remaining. The builder potion is also applied to the Goblin Builder. Clock Tower, Builder's Apprentice and Lab Assistant boosts aren't modelled, so re-sync after using them.
+- **Upgrade durations** (for progress bars) come from a ClashKingAssets snapshot dated 2026-10-12. Anything added to the game later shows as `Item #id`, and its bar starts from the first sync. Run `tools/update-assets.ps1` to refresh it.
+- **Potions** assume the export reports un-boosted time remaining. The builder potion is also applied to the Goblin Builder. The Clock Tower boost isn't modelled, so re-sync after using it.
+- **Helpers**: only the shift running at export time is counted. With "Keep assigned", the next day's shift isn't predicted, so re-sync after it. The helper fields (`helper_timer`, `helper_recurrent`, `helper_cooldown`) were worked out by community trackers; Supercell hasn't documented them.
 - **Town Hall weapon vs. Town Hall upgrade**: a running Town Hall timer counts as a weapon upgrade when the weapon is below level 5. Otherwise it counts as the Town Hall itself.
 - **Supercharges** show as `→ ⚡N` with a bar measured from the first sync.
 - Without exact-alarm permission, a countdown that hits zero can show a minus sign for a few minutes until Android lets the widget refresh.

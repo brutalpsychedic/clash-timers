@@ -157,5 +157,15 @@
             android:text="@string/how_to"
             android:textColor="@color/text_body"
             android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:autoLink="web"
+            android:text="@string/credits"
+            android:textColor="@color/text_muted"
+            android:textColorLink="@color/gold"
+            android:textSize="11sp" />
     </LinearLayout>
 </ScrollView>

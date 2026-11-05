@@ -117,6 +117,11 @@ object Alarms {
             if (b.startAt > now) next = minOf(next, b.startAt)
             if (b.endsAt > now) next = minOf(next, b.endsAt)
         }
+        for (h in village.helpers) {
+            // Shift ends -> "Sleeping"; work day ends -> "Ready to assign".
+            if (h.workingUntil > now) next = minOf(next, h.workingUntil)
+            if (h.awakeAt > now) next = minOf(next, h.awakeAt)
+        }
         return next.takeIf { it != Long.MAX_VALUE }
     }
 

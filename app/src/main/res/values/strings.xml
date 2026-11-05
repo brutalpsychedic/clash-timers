@@ -12,6 +12,13 @@
     <string name="section_builder_base">BUILDER BASE</string>
     <string name="goblin_suffix">" + Goblin"</string>
     <string name="goblin_badge">GOBLIN</string>
+    <string name="helper_badge">HELPER</string>
+    <string name="helper_apprentice">Apprentice</string>
+    <string name="helper_assistant">Lab Assistant</string>
+    <string name="helper_working">%1$s → %2$s</string>
+    <string name="helper_sleeping">%1$s · Sleeping</string>
+    <string name="helper_ready">%1$s · Ready to assign</string>
+    <string name="helper_awake">Awake</string>
     <string name="ready">Ready!</string>
     <plurals name="builders_idle">
         <item quantity="one">💤 %d builder idle</item>
@@ -59,5 +66,6 @@
     <string name="exact_alarms">Allow exact countdowns</string>
     <string name="exact_alarms_hint">Without this, timers over a day show as \"2d 14h\" instead of ticking seconds.</string>
     <string name="how_to_title">How syncing works</string>
-    <string name="how_to">1. In Clash of Clans open Settings › More Settings › Data Export and tap Copy.\n2. Tap Sync on the widget (or Sync from clipboard here).\n3. Re-export whenever you start, finish or speed up an upgrade.\n\nTap Sync with no new export copied and it opens the game for you. Tap any row to open the game.\n\nThe game doesn\'t say when you drink a potion, so log it here to keep the countdowns right.</string>
+    <string name="how_to">1. In Clash of Clans open Settings › More Settings › Data Export and tap Copy.\n2. Tap Sync on the widget (or Sync from clipboard here).\n3. Re-export whenever you start, finish or speed up an upgrade.\n\nTap Sync with no new export copied and it opens the game for you. Tap any row to open the game.\n\nThe game doesn\'t say when you drink a potion, so log it here to keep the countdowns right.\n\nYour Builder\'s Apprentice and Lab Assistant show at the top of Builders and Lab: what they\'re working on, or when they wake up.</string>
+    <string name="credits">Icons from ClashKing (assets.clashk.ing).\nThis content is not affiliated with, endorsed, sponsored, or specifically approved by Supercell and Supercell is not responsible for it. For more information see Supercell\'s Fan Content Policy: www.supercell.com/fan-content-policy.</string>
 </resources>

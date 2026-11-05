@@ -2,9 +2,10 @@ package com.clashtimers
 
 import android.content.res.Resources
 
-/** Flat list behind the widget's ListView: section headers, upgrade rows and idle warnings. */
+/** Flat list behind the widget's ListView: section headers, helpers, idle warnings and upgrade rows. */
 sealed interface WidgetItem {
     data class Header(val title: String, val goblin: Boolean, val boost: Boost?) : WidgetItem
+    data class HelperRow(val helper: Helper) : WidgetItem
     data class Row(val upgrade: Upgrade) : WidgetItem
     data class Idle(val text: String) : WidgetItem
 }
@@ -43,6 +44,7 @@ object WidgetItems {
                     if (running.isEmpty()) res.getString(R.string.builder_base_idle) else null
                 }
             }
+            v.helpers.filter { it.group == group }.mapTo(out) { WidgetItem.HelperRow(it) }
             if (idle != null) out += WidgetItem.Idle(idle)
             rows.mapTo(out) { WidgetItem.Row(it) }
         }

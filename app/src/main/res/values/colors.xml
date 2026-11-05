@@ -11,4 +11,6 @@
     <color name="text_light">#FFFFFFFF</color>
     <color name="text_body">#FFE8DCCB</color>
     <color name="text_muted">#FFB9A58E</color>
+    <color name="helper_blue">#FF8FC1FF</color>
+    <color name="sleep_lavender">#FFC9B8FF</color>
 </resources>
