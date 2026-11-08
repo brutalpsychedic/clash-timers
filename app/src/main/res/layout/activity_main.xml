@@ -113,6 +113,30 @@
 
         <TextView
             style="@style/AppLabel"
+            android:text="@string/daily_label" />
+
+        <Button
+            android:id="@+id/daily_home_star"
+            style="@style/AppButton"
+            android:text="@string/daily_home_button" />
+
+        <Button
+            android:id="@+id/daily_builder_star"
+            style="@style/AppButton"
+            android:text="@string/daily_builder_button" />
+
+        <Button
+            android:id="@+id/daily_clock_tower"
+            style="@style/AppButton"
+            android:text="@string/daily_clock_button" />
+
+        <Button
+            android:id="@+id/daily_reset"
+            style="@style/AppButton"
+            android:text="@string/daily_reset" />
+
+        <TextView
+            style="@style/AppLabel"
             android:text="@string/widget_label" />
 
         <Switch

@@ -50,6 +50,15 @@ class MainActivity : Activity() {
             refreshStatus()
         }
 
+        findViewById<Button>(R.id.daily_home_star).setOnClickListener { daily(DailyKind.HOME_STAR) }
+        findViewById<Button>(R.id.daily_builder_star).setOnClickListener { daily(DailyKind.BUILDER_STAR) }
+        findViewById<Button>(R.id.daily_clock_tower).setOnClickListener { daily(DailyKind.CLOCK_TOWER) }
+        findViewById<Button>(R.id.daily_reset).setOnClickListener {
+            Sync.resetDailies(this)
+            SyncActivity.toast(this, getString(R.string.daily_reset_done))
+            refreshStatus()
+        }
+
         findViewById<Switch>(R.id.show_builder_base).apply {
             isChecked = store.showBuilderBase
             setOnCheckedChangeListener { _, checked ->
@@ -82,6 +91,16 @@ class MainActivity : Activity() {
             Sync.NoExport, Sync.NotNewer -> SyncActivity.toast(this, getString(R.string.clipboard_empty))
             is Sync.Failed -> SyncActivity.toast(this, result.message)
         }
+        refreshStatus()
+    }
+
+    private fun daily(kind: DailyKind) {
+        if (store.village == null) {
+            SyncActivity.toast(this, getString(R.string.sync_first))
+            return
+        }
+        val message = Sync.useDaily(this, kind, force = true)
+        SyncActivity.toast(this, message ?: getString(R.string.daily_not_ready, getString(kind.label)))
         refreshStatus()
     }
 

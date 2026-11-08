@@ -31,6 +31,17 @@ object ExportParser {
     private const val BOB_HUT = 1000064
     private const val BOB_CONTROL = 1000065 // Builder Base; level 5 sends B.O.B home as 6th builder
     private const val PET_HOUSE = 1000068
+    private const val CLOCK_TOWER = 1000039 // Builder Base
+
+    // "boosts": {"builder_boost": 1206, "lab_boost": 4786, "clocktower_cooldown": 878}: seconds
+    // left on potions / the Clock Tower at export time. clocktower_cooldown runs to the next
+    // free boost and includes a running clocktower_boost.
+    private val EXPORT_BOOSTS = mapOf(
+        "builder_boost" to (Group.BUILDERS to 10),
+        "lab_boost" to (Group.LAB to 24),
+        "pet_boost" to (Group.PETS to 24),
+        "clocktower_boost" to (Group.BUILDER_BASE to ClockTower.MULTIPLIER),
+    )
 
     // A Town Hall timer with a weapon below this level is read as a weapon upgrade.
     private const val MAX_WEAPON_LEVEL = 5
@@ -49,7 +60,10 @@ object ExportParser {
         return t.startsWith("{") && t.contains("\"buildings\"")
     }
 
-    /** @param previous last parsed village, used to keep progress bars steady across syncs. */
+    /**
+     * @param boosts potions / Clock Tower boosts logged in the app (the export's own are added here).
+     * @param previous last parsed village, used to keep progress bars steady across syncs.
+     */
     fun parse(text: String, game: GameData, boosts: List<Boost>, previous: Village?): Village {
         val root = try {
             JSONObject(text.trim())
@@ -76,8 +90,12 @@ object ExportParser {
             }
         }
         val builderBase = root.optJSONArray("buildings2")
+        var clockTowerLevel = 0
         builderBase?.forEachObject {
-            if (it.optInt("data") == BOB_CONTROL && it.optInt("lvl") >= 5) bob = true
+            when (it.optInt("data")) {
+                BOB_CONTROL -> if (it.optInt("lvl") >= 5) bob = true
+                CLOCK_TOWER -> clockTowerLevel = maxOf(clockTowerLevel, it.optInt("lvl"))
+            }
         }
 
         val helperRows = HashMap<Int, JSONObject>()
@@ -86,7 +104,13 @@ object ExportParser {
         }
         val helperLevels = HELPER_GROUPS.entries.associate { (id, group) -> group to (helperRows[id]?.optInt("lvl") ?: 0) }
 
-        val liveBoosts = boosts.filter { it.endsAt > exportedAt }
+        val exportBoosts = root.optJSONObject("boosts")
+        val loggedBoosts = boosts.filter { it.endsAt > exportedAt }
+        val liveBoosts = loggedBoosts + EXPORT_BOOSTS.mapNotNull { (key, groupAndRate) ->
+            val seconds = exportBoosts?.optLong(key) ?: 0L
+            if (seconds <= 0) return@mapNotNull null
+            Boost(groupAndRate.first, groupAndRate.second, exportedAt, exportedAt + seconds * 1000)
+        }
         val upgrades = ArrayList<Upgrade>()
         val assignments = HashMap<Group, Assignment>()
         for ((key, kind) in SECTIONS) {
@@ -117,6 +141,22 @@ object ExportParser {
             Helper(id, group, row?.optInt("lvl") ?: 0, job?.task, workingUntil, awakeAt, job?.keepAssigned == true)
         }
 
+        val clockTower = if (clockTowerLevel <= 0) null else {
+            // A boost started from the widget after this export beats the export's numbers.
+            val tapped = loggedBoosts.filter { it.group == Group.BUILDER_BASE && it.startAt >= exportedAt }.maxByOrNull { it.endsAt }
+            if (tapped != null) {
+                ClockTower(clockTowerLevel, tapped.endsAt, tapped.endsAt + ClockTower.COOLDOWN)
+            } else {
+                val boostSeconds = exportBoosts?.optLong("clocktower_boost") ?: 0L
+                val cooldownSeconds = exportBoosts?.optLong("clocktower_cooldown") ?: 0L
+                ClockTower(
+                    clockTowerLevel,
+                    if (boostSeconds > 0) exportedAt + boostSeconds * 1000 else 0L,
+                    exportedAt + cooldownSeconds * 1000, // no cooldown field: ready now
+                )
+            }
+        }
+
         return Village(
             tag = root.optString("tag"),
             townHall = townHall,
@@ -128,6 +168,7 @@ object ExportParser {
             upgrades = upgrades,
             boosts = liveBoosts,
             helpers = helpers,
+            clockTower = clockTower,
         )
     }
 

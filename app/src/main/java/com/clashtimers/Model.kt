@@ -138,6 +138,32 @@ data class Helper(
     }
 }
 
+/**
+ * The Builder Base Clock Tower: a free 10x boost for 12 + 2 x level minutes (26 at level 7),
+ * then a 22-hour cooldown that starts when the boost ends.
+ */
+data class ClockTower(
+    val level: Int,
+    /** End of the running boost, 0 if none. */
+    val boostEndsAt: Long,
+    /** When the next free boost can be started. */
+    val readyAt: Long,
+) {
+    val boostMillis get() = (12 + 2 * level) * MINUTE
+
+    fun toJson(): JSONObject = JSONObject()
+        .put("lvl", level)
+        .put("boostEndsAt", boostEndsAt)
+        .put("readyAt", readyAt)
+
+    companion object {
+        const val MULTIPLIER = 10
+        const val COOLDOWN = 22 * HOUR
+
+        fun fromJson(o: JSONObject) = ClockTower(o.optInt("lvl"), o.optLong("boostEndsAt"), o.optLong("readyAt"))
+    }
+}
+
 data class Village(
     val tag: String,
     val townHall: Int,
@@ -147,9 +173,19 @@ data class Village(
     val hasBuilderBase: Boolean,
     val exportedAt: Long,
     val upgrades: List<Upgrade>,
+    /** Potions and Clock Tower boosts: from the export plus any logged in the app since. */
     val boosts: List<Boost>,
     val helpers: List<Helper> = emptyList(),
+    val clockTower: ClockTower? = null,
 ) {
+    /** End of the boost running for [group] at [now], following back-to-back windows; 0 if none. */
+    fun boostedUntil(group: Group, now: Long): Long {
+        val windows = boosts.filter { it.group == group }.sortedBy { it.startAt }
+        var end = windows.firstOrNull { it.isActive(now) }?.endsAt ?: return 0L
+        for (w in windows) if (w.startAt <= end && w.endsAt > end) end = w.endsAt
+        return end
+    }
+
     fun toJson(): JSONObject = JSONObject()
         .put("tag", tag)
         .put("th", townHall)
@@ -161,6 +197,7 @@ data class Village(
         .put("upgrades", JSONArray(upgrades.map { it.toJson() }))
         .put("boosts", JSONArray(boosts.map { it.toJson() }))
         .put("helpers", JSONArray(helpers.map { it.toJson() }))
+        .put("clockTower", clockTower?.toJson())
 
     companion object {
         fun fromJson(o: JSONObject) = Village(
@@ -174,6 +211,7 @@ data class Village(
             upgrades = o.optJSONArray("upgrades")?.mapObjects(Upgrade::fromJson) ?: emptyList(),
             boosts = o.optJSONArray("boosts")?.mapObjects(Boost::fromJson) ?: emptyList(),
             helpers = o.optJSONArray("helpers")?.mapObjects(Helper::fromJson) ?: emptyList(),
+            clockTower = o.optJSONObject("clockTower")?.let(ClockTower::fromJson),
         )
     }
 }

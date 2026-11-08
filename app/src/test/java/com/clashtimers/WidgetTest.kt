@@ -131,15 +131,100 @@ class WidgetTest {
         assertEquals(null, icons.get(1000064, 1))         // B.O.B's Hut has no art: glyph fallback
     }
 
+    private fun withBoosts(boosts: String) = sample.replace(""""boosts": {"clocktower_cooldown": 69194}""", """"boosts": $boosts""")
+
+    @Test
+    fun clockTowerCooldownFromExport() {
+        val v = parse()
+        val tower = v.clockTower!!
+        assertEquals(7, tower.level)
+        assertEquals(26 * MINUTE, tower.boostMillis) // level 7: 26 minutes
+        assertEquals(exportedAt * 1000 + 69_194_000, tower.readyAt)
+        val daily = Dailies.from(v, 0L, 0L, true).single { it.kind == DailyKind.CLOCK_TOWER }
+        assertEquals(Daily.State.COOLDOWN, daily.state(System.currentTimeMillis()))
+    }
+
+    @Test
+    fun runningClockTowerSpeedsUpBuilderBase() {
+        // A real export taken during a boost: "clocktower_boost": 1789, "clocktower_cooldown": 80989.
+        val v = ExportParser.parse(withBoosts("""{"clocktower_boost": 1789, "clocktower_cooldown": 80989}"""), GameData.get(context), emptyList(), null)
+        val start = exportedAt * 1000
+        val megaTesla = v.upgrades.single { it.id == 1000052 }
+        // 1789 s at 10x do 17 890 s of the 286 810 s; the rest runs at 1x.
+        assertEquals(start + (286_810 - 17_890 + 1_789) * 1000L, megaTesla.finishAt)
+        val home = v.upgrades.first { it.id == 1000019 }
+        assertEquals(start + 3_695_000, home.finishAt) // the home village isn't affected
+
+        val now = System.currentTimeMillis()
+        val daily = Dailies.from(v, 0L, 0L, true).single { it.kind == DailyKind.CLOCK_TOWER }
+        assertEquals(Daily.State.ACTIVE, daily.state(now))
+        assertEquals(start + 80_989_000, daily.readyAt)
+        val bbHeader = WidgetItems.build(context.resources, v, true, now)
+            .filterIsInstance<WidgetItem.Header>().single { it.title == "BUILDER BASE" }
+        assertEquals(10, bbHeader.boostMultiplier)
+        assertEquals(start + 1_789_000, bbHeader.boostUntil)
+    }
+
+    @Test
+    fun exportedPotionsApply() {
+        val v = ExportParser.parse(withBoosts("""{"builder_boost": 1206, "lab_boost": 4786}"""), GameData.get(context), emptyList(), null)
+        val start = exportedAt * 1000
+        assertEquals(start + 369_500, v.upgrades.first { it.id == 1000019 }.finishAt) // 3695 s at 10x
+        assertEquals(start + 1_206_000, v.boostedUntil(Group.BUILDERS, start))
+        assertEquals(start + 4_786_000, v.boostedUntil(Group.LAB, start))
+        assertEquals(null, v.clockTower!!.boostEndsAt.takeIf { it > 0 })
+    }
+
+    @Test
+    fun starBonusTaps() {
+        val store = Store(context)
+        assertTrue(Sync.importText(context, sample, force = true) is Sync.Imported)
+        val before = System.currentTimeMillis()
+        // Never logged: shown as ready, and a tap marks it collected.
+        assertEquals(Daily.State.READY, Dailies.from(store).single { it.kind == DailyKind.HOME_STAR }.state(before))
+        assertTrue(Sync.useDaily(context, DailyKind.HOME_STAR) != null)
+        assertTrue(Sync.useDaily(context, DailyKind.BUILDER_STAR) != null)
+
+        val dailies = Dailies.from(store)
+        val home = dailies.single { it.kind == DailyKind.HOME_STAR }
+        val builder = dailies.single { it.kind == DailyKind.BUILDER_STAR }
+        assertTrue(home.readyAt - store.homeStarAt == 24 * HOUR)
+        assertTrue(builder.readyAt - store.builderStarAt == 22 * HOUR)
+        assertEquals(Daily.State.COOLDOWN, home.state(System.currentTimeMillis()))
+        // A second tap while cooling down does nothing (the widget opens the game instead).
+        assertEquals(null, Sync.useDaily(context, DailyKind.HOME_STAR))
+
+        Sync.resetDailies(context)
+        assertEquals(0L, store.homeStarAt)
+        assertEquals(Daily.State.READY, Dailies.from(store).single { it.kind == DailyKind.HOME_STAR }.state(System.currentTimeMillis()))
+    }
+
+    @Test
+    fun clockTowerTapStartsBoost() {
+        val store = Store(context)
+        assertTrue(Sync.importText(context, withBoosts("{}"), force = true) is Sync.Imported) // no cooldown: ready
+        val tapAt = System.currentTimeMillis()
+        assertTrue(Sync.useDaily(context, DailyKind.CLOCK_TOWER) != null)
+
+        val tower = store.village!!.clockTower!!
+        assertTrue(tower.boostEndsAt - tapAt in 26 * MINUTE..26 * MINUTE + 2_000)
+        assertEquals(tower.boostEndsAt + 22 * HOUR, tower.readyAt)
+        assertEquals(Daily.State.ACTIVE, Dailies.from(store).single { it.kind == DailyKind.CLOCK_TOWER }.state(System.currentTimeMillis()))
+        // Builder Base upgrades now finish sooner than without the boost.
+        val plain = parse().upgrades.single { it.id == 1000052 }.finishAt
+        assertTrue(store.village!!.upgrades.single { it.id == 1000052 }.finishAt < plain)
+    }
+
     @Test
     fun rendersWidget() {
         val store = Store(context)
         store.playerName = "Bj"
         assertTrue(Sync.importText(context, sample, force = true) is Sync.Imported)
+        assertTrue(Sync.useDaily(context, DailyKind.HOME_STAR) != null) // home collected, builder still ready
         snapshot(store, "widget.png")
 
         assertTrue(Sync.logPotion(context, Group.BUILDERS, 10))
-        assertTrue(store.village!!.boosts.single().isActive(System.currentTimeMillis()))
+        assertTrue(store.village!!.boosts.single { it.group == Group.BUILDERS }.isActive(System.currentTimeMillis()))
         snapshot(store, "widget-builder-potion.png")
     }
 
@@ -216,10 +301,12 @@ class WidgetTest {
           "pets": [{"data": 73000011, "lvl": 1, "timer": 90792}],
           "buildings2": [
             {"data": 1000034, "lvl": 10, "cnt": 1},
+            {"data": 1000039, "lvl": 7, "cnt": 1},
             {"data": 1000043, "lvl": 4, "timer": 13969},
             {"data": 1000052, "lvl": 6, "timer": 286810}
           ],
-          "units2": [{"data": 4000036, "lvl": 14, "timer": 335279}]
+          "units2": [{"data": 4000036, "lvl": 14, "timer": 335279}],
+          "boosts": {"clocktower_cooldown": 69194}
         }
         """
     }

@@ -10,6 +10,13 @@
     <string name="section_lab">LAB</string>
     <string name="section_pets">PETS</string>
     <string name="section_builder_base">BUILDER BASE</string>
+    <string name="section_daily">DAILY</string>
+    <string name="daily_home_star">Home Star Bonus</string>
+    <string name="daily_builder_star">Builder Star Bonus</string>
+    <string name="daily_clock_tower">Clock Tower Boost</string>
+    <string name="daily_ready">Ready!</string>
+    <string name="star_collected">%1$s collected · next in %2$d h</string>
+    <string name="clock_tower_started">Clock Tower boost started · ×10 for %1$d min</string>
     <string name="goblin_suffix">" + Goblin"</string>
     <string name="goblin_badge">GOBLIN</string>
     <string name="helper_badge">HELPER</string>
@@ -58,6 +65,13 @@
     <string name="potion_pet">Pet ×24</string>
     <string name="potion_logged">%1$s logged for 1 hour</string>
     <string name="clear_potions">Clear potions</string>
+    <string name="daily_label">Daily — or just tap the row on the widget</string>
+    <string name="daily_home_button">Home Star Bonus collected</string>
+    <string name="daily_builder_button">Builder Star Bonus collected</string>
+    <string name="daily_clock_button">Clock Tower boost started</string>
+    <string name="daily_reset">Reset daily timers</string>
+    <string name="daily_not_ready">%1$s isn\'t ready yet</string>
+    <string name="daily_reset_done">Daily timers reset</string>
     <string name="sync_first">Sync your village first</string>
     <string name="widget_label">Widget</string>
     <string name="show_builder_base">Show Builder Base on the widget</string>
@@ -66,6 +80,6 @@
     <string name="exact_alarms">Allow exact countdowns</string>
     <string name="exact_alarms_hint">Without this, timers over a day show as \"2d 14h\" instead of ticking seconds.</string>
     <string name="how_to_title">How syncing works</string>
-    <string name="how_to">1. In Clash of Clans open Settings › More Settings › Data Export and tap Copy.\n2. Tap Sync on the widget (or Sync from clipboard here).\n3. Re-export whenever you start, finish or speed up an upgrade.\n\nTap Sync with no new export copied and it opens the game for you. Tap any row to open the game.\n\nThe game doesn\'t say when you drink a potion, so log it here to keep the countdowns right.\n\nYour Builder\'s Apprentice and Lab Assistant show at the top of Builders and Lab: what they\'re working on, or when they wake up.</string>
+    <string name="how_to">1. In Clash of Clans open Settings › More Settings › Data Export and tap Copy.\n2. Tap Sync on the widget (or Sync from clipboard here).\n3. Re-export whenever you start, finish or speed up an upgrade.\n\nTap Sync with no new export copied and it opens the game for you. Tap any row to open the game.\n\nThe game doesn\'t say when you drink a potion, so log it here to keep the countdowns right.\n\nYour Builder\'s Apprentice and Lab Assistant show at the top of Builders and Lab: what they\'re working on, or when they wake up.\n\nDAILY: the export has no Star Bonus timers, so tap the Star Bonus row on the widget when you collect one and it counts down to the next (24 h home, 22 h Builder Base). The Clock Tower syncs from the export; tap its row when you start the free boost to log it straight away.</string>
     <string name="credits">Icons from ClashKing (assets.clashk.ing).\nThis content is not affiliated with, endorsed, sponsored, or specifically approved by Supercell and Supercell is not responsible for it. For more information see Supercell\'s Fan Content Policy: www.supercell.com/fan-content-policy.</string>
 </resources>

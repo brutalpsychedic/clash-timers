@@ -50,7 +50,7 @@ class TimersWidget : AppWidgetProvider() {
             val now = System.currentTimeMillis()
             for (id in ids) manager.updateAppWidget(id, rootViews(context, store, village, id, now))
             manager.notifyAppWidgetViewDataChanged(ids, R.id.list)
-            Alarms.scheduleNext(context, village, now)
+            Alarms.scheduleNext(context, village, Dailies.from(store), now)
         }
 
         @Suppress("DEPRECATION") // setRemoteAdapter(Intent) keeps API 26-30 support
@@ -82,12 +82,12 @@ object Alarms {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
             context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
 
-    fun scheduleNext(context: Context, village: Village?, now: Long) {
+    fun scheduleNext(context: Context, village: Village?, dailies: List<Daily>, now: Long) {
         val alarms = context.getSystemService(AlarmManager::class.java)
         val pending = refreshIntent(context)
         alarms.cancel(pending)
         val exact = canExact(context)
-        val at = village?.let { nextChange(it, now, exact) } ?: return
+        val at = village?.let { nextChange(it, dailies, now, exact) } ?: return
         // RTC (not _WAKEUP): nobody sees the widget while the screen is off.
         if (exact) alarms.setExact(AlarmManager.RTC, at + 500, pending)
         else alarms.setWindow(AlarmManager.RTC, at + 500, MINUTE, pending)
@@ -97,8 +97,8 @@ object Alarms {
         context.getSystemService(AlarmManager::class.java).cancel(refreshIntent(context))
     }
 
-    /** Next upgrade finish, day-digit rollover, hour change (inexact mode) or boost edge. */
-    private fun nextChange(village: Village, now: Long, exact: Boolean): Long? {
+    /** Next upgrade finish, day-digit rollover, hour change (inexact mode), boost edge or daily reset. */
+    private fun nextChange(village: Village, dailies: List<Daily>, now: Long, exact: Boolean): Long? {
         var next = Long.MAX_VALUE
         for (u in village.upgrades) {
             val left = u.finishAt - now
@@ -121,6 +121,11 @@ object Alarms {
             // Shift ends -> "Sleeping"; work day ends -> "Ready to assign".
             if (h.workingUntil > now) next = minOf(next, h.workingUntil)
             if (h.awakeAt > now) next = minOf(next, h.awakeAt)
+        }
+        for (d in dailies) {
+            // Boost ends -> cooldown; cooldown ends -> "Ready!".
+            if (d.activeUntil > now) next = minOf(next, d.activeUntil)
+            if (d.readyAt > now) next = minOf(next, d.readyAt)
         }
         return next.takeIf { it != Long.MAX_VALUE }
     }

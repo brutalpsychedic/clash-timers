@@ -19,7 +19,11 @@ Supercell's public API doesn't expose upgrade timers, so the widget reads the ga
 
 - **Sync** on the widget reads the clipboard. If no new export is there, it opens Clash so you can copy one, then tap Sync again.
 - Tapping any row opens Clash.
-- **Potions**: the export doesn't say when you drink one, so log it in the app (Builder ×10, Research ×24, Pet ×24, 1 hour from now). The builder header shows a `×10 34:44` pill while it runs.
+- **DAILY** (top of the widget): your once-a-day freebies for both villages. Each row's gold bar fills as the wait runs out, then turns to **Ready!**:
+  - **Home Star Bonus** (24 h) and **Builder Star Bonus** (22 h): the export doesn't include these, so tap the row when you collect one and it counts down to the next.
+  - **Clock Tower Boost**: synced from the export. It shows the free ×10 boost while it runs (26 min at level 7, i.e. 12 + 2 × level), then the wait until the next one. Builder Base timers speed up while it runs, and the Builder Base header gets a `×10` pill. Tap the row when you start the boost to log it without re-syncing.
+  - Tapping a row that isn't ready opens the game. The app has buttons to log or reset these too.
+- **Potions**: potions running when you export are read from the export automatically. If you drink one afterwards, log it in the app (Builder ×10, Research ×24, Pet ×24, 1 hour from now). The section header shows a `×10 34:44` pill while it runs.
 - `💤 N builders idle`, `Laboratory idle` and `Pet House idle` rows appear when something isn't working.
 - **Helpers**: the Apprentice sits at the top of Builders and the Lab Assistant at the top of Lab, each in a blue row:
   - `Apprentice → Royal Champion` with a countdown while it works its one-hour shift. The helped upgrade gets a blue **HELPER** tag and finishes sooner: the helper adds its level to the speed, e.g. a level 8 Apprentice makes it 9×, or 18× during a Builder Potion.
@@ -59,7 +63,8 @@ keytool -genkeypair -keystore keystore/clashtimers.jks -alias clashtimers -keyal
 ## Known limits
 
 - **Upgrade durations** (for progress bars) come from a ClashKingAssets snapshot dated 2026-10-12. Anything added to the game later shows as `Item #id`, and its bar starts from the first sync. Run `tools/update-assets.ps1` to refresh it.
-- **Potions** assume the export reports un-boosted time remaining. The builder potion is also applied to the Goblin Builder. The Clock Tower boost isn't modelled, so re-sync after using it.
+- **Potions and the Clock Tower** come from the export's `boosts` object (`builder_boost`, `lab_boost`, `pet_boost`, `clocktower_boost`, `clocktower_cooldown`), assuming upgrade timers there are un-boosted time left. The builder potion is also applied to the Goblin Builder. Builder Bite and Study Soup snacks (`*_consumable`) aren't modelled. Clock Tower Potions (always 30 min, no cooldown) aren't told apart from the free boost.
+- **Star Bonus** timing is a rolling 24 h (home) / 22 h (Builder Base) from when you tap it, per community guides; Supercell doesn't publish it. A second stacked bonus isn't tracked.
 - **Helpers**: only the shift running at export time is counted. With "Keep assigned", the next day's shift isn't predicted, so re-sync after it. The helper fields (`helper_timer`, `helper_recurrent`, `helper_cooldown`) were worked out by community trackers; Supercell hasn't documented them.
 - **Town Hall weapon vs. Town Hall upgrade**: a running Town Hall timer counts as a weapon upgrade when the weapon is below level 5. Otherwise it counts as the Town Hall itself.
 - **Supercharges** show as `→ ⚡N` with a bar measured from the first sync.

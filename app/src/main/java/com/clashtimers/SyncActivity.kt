@@ -19,7 +19,12 @@ class SyncActivity : Activity() {
         if (!hasFocus || handled) return
         handled = true
 
-        if (intent?.action == ACTION_OPEN_GAME) {
+        val daily = intent?.getStringExtra(EXTRA_DAILY)?.let { name -> DailyKind.entries.firstOrNull { it.name == name } }
+        if (daily != null) {
+            // Tapped a DAILY row: a ready one is marked collected / started, others open the game.
+            val message = Sync.useDaily(this, daily)
+            if (message != null) toast(this, message) else openGame(this)
+        } else if (intent?.action == ACTION_OPEN_GAME) {
             openGame(this)
         } else {
             when (val result = Sync.importText(this, Clipboard.text(this), force = false)) {
@@ -35,6 +40,8 @@ class SyncActivity : Activity() {
     }
 
     companion object {
+        /** Fill-in extra on DAILY rows: the [DailyKind] name. */
+        const val EXTRA_DAILY = "com.clashtimers.DAILY"
         private const val ACTION_SYNC = "com.clashtimers.SYNC"
         private const val ACTION_OPEN_GAME = "com.clashtimers.OPEN_GAME"
         private const val CLASH_PACKAGE = "com.supercell.clashofclans"

@@ -22,12 +22,15 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
     private var exact = true
     private val icons = IconCache(context)
     private val glyphPadding = (7 * context.resources.displayMetrics.density).toInt()
+    private val starPadding = (3 * context.resources.displayMetrics.density).toInt()
 
     override fun onCreate() {}
 
     override fun onDataSetChanged() {
         val store = Store(context)
-        items = WidgetItems.build(context.resources, store.village, store.showBuilderBase, System.currentTimeMillis())
+        items = WidgetItems.build(
+            context.resources, store.village, store.showBuilderBase, System.currentTimeMillis(), Dailies.from(store),
+        )
         exact = Alarms.canExact(context)
     }
 
@@ -39,6 +42,7 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
         val now = System.currentTimeMillis()
         return when (val item = items.getOrNull(position)) {
             is WidgetItem.Header -> header(item, now)
+            is WidgetItem.DailyRow -> daily(item.daily, now)
             is WidgetItem.HelperRow -> helper(item.helper, now)
             is WidgetItem.Row -> row(item.upgrade, now)
             is WidgetItem.Idle -> idle(item.text)
@@ -48,7 +52,7 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
 
     override fun getLoadingView(): RemoteViews? = null
 
-    override fun getViewTypeCount() = 4
+    override fun getViewTypeCount() = 5
 
     override fun getItemId(position: Int) = position.toLong()
 
@@ -64,14 +68,49 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
         }
         rv.setTextViewText(R.id.title, title)
 
-        val boost = item.boost
-        if (boost != null && boost.endsAt > now) {
+        if (item.boostUntil > now) {
             rv.setViewVisibility(R.id.boost, View.VISIBLE)
-            rv.setChronometer(R.id.boost, SystemClock.elapsedRealtime() + (boost.endsAt - now), "×${boost.multiplier} %s", true)
+            rv.setChronometer(R.id.boost, SystemClock.elapsedRealtime() + (item.boostUntil - now), "×${item.boostMultiplier} %s", true)
             rv.setChronometerCountDown(R.id.boost, true)
         } else {
             rv.setViewVisibility(R.id.boost, View.GONE)
         }
+        return rv
+    }
+
+    /** Star Bonus / Clock Tower: countdown to the next one, "Ready!", or the running boost. */
+    private fun daily(d: Daily, now: Long): RemoteViews {
+        val rv = RemoteViews(context.packageName, R.layout.widget_item_daily)
+        rv.setProgressBar(R.id.progress, 1000, (d.progress(now) * 1000).toInt(), false)
+        when (d.kind) {
+            DailyKind.HOME_STAR -> bindStar(rv, R.drawable.ic_star_home)
+            DailyKind.BUILDER_STAR -> bindStar(rv, R.drawable.ic_star_builder)
+            DailyKind.CLOCK_TOWER -> bindIcon(rv, CLOCK_TOWER_ID, d.level, Kind.BB_BUILDING)
+        }
+        rv.setTextViewText(R.id.name, context.getString(d.kind.label))
+        when (d.state(now)) {
+            Daily.State.ACTIVE -> {
+                rv.setTextColor(R.id.name, context.getColor(R.color.goblin_green))
+                rv.setImageViewResource(R.id.status, R.drawable.ic_clock)
+                rv.setViewVisibility(R.id.time, View.VISIBLE)
+                rv.setViewVisibility(R.id.time_static, View.GONE)
+                rv.setChronometer(R.id.time, SystemClock.elapsedRealtime() + (d.activeUntil - now), "×${ClockTower.MULTIPLIER} %s", true)
+                rv.setChronometerCountDown(R.id.time, true)
+            }
+            Daily.State.COOLDOWN -> {
+                rv.setTextColor(R.id.name, context.getColor(R.color.text_light))
+                rv.setImageViewResource(R.id.status, R.drawable.ic_clock)
+                countdown(rv, d.readyAt - now)
+            }
+            Daily.State.READY -> {
+                // The full gold bar already says "ready"; amber text would vanish on it.
+                rv.setTextColor(R.id.name, context.getColor(R.color.text_light))
+                rv.setImageViewResource(R.id.status, R.drawable.ic_check)
+                showStatic(rv, context.getString(R.string.daily_ready))
+            }
+        }
+        // Ready rows log the tap (collected / boost started); others open the game.
+        rv.setOnClickFillInIntent(R.id.daily_root, Intent().putExtra(SyncActivity.EXTRA_DAILY, d.kind.name))
         return rv
     }
 
@@ -141,6 +180,13 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
         return rv
     }
 
+    // Recycled rows keep the previous row's background and padding unless reset.
+    private fun bindStar(rv: RemoteViews, drawable: Int) {
+        rv.setImageViewResource(R.id.icon, drawable)
+        rv.setInt(R.id.icon, "setBackgroundResource", 0)
+        rv.setViewPadding(R.id.icon, starPadding, starPadding, starPadding, starPadding)
+    }
+
     private fun bindIcon(rv: RemoteViews, id: Int, level: Int, kind: Kind?) {
         val art = icons.get(id, level)
         if (art != null) {
@@ -179,6 +225,10 @@ internal class TimersFactory(private val context: Context) : RemoteViewsService.
     private fun idle(text: String) = RemoteViews(context.packageName, R.layout.widget_item_idle).apply {
         setTextViewText(R.id.idle_text, text)
         setOnClickFillInIntent(R.id.idle_root, Intent())
+    }
+
+    private companion object {
+        const val CLOCK_TOWER_ID = 1000039
     }
 }
 

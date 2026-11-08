@@ -21,6 +21,16 @@ class Store(context: Context) {
         get() = prefs.getString(KEY_RAW, null)
         set(value) = prefs.edit().putString(KEY_RAW, value).apply()
 
+    /** When the Star Bonus was last collected (tapped on the widget); 0 = never. Not in the export. */
+    var homeStarAt: Long
+        get() = prefs.getLong(KEY_HOME_STAR, 0L)
+        set(value) = prefs.edit().putLong(KEY_HOME_STAR, value).apply()
+
+    var builderStarAt: Long
+        get() = prefs.getLong(KEY_BUILDER_STAR, 0L)
+        set(value) = prefs.edit().putLong(KEY_BUILDER_STAR, value).apply()
+
+    /** Potions and Clock Tower boosts logged in the app; the export's own aren't stored here. */
     var boosts: List<Boost>
         get() = prefs.getString(KEY_BOOSTS, null)
             ?.let { runCatching { JSONArray(it).mapObjects(Boost::fromJson) }.getOrNull() }
@@ -39,5 +49,7 @@ class Store(context: Context) {
         const val KEY_RAW = "raw_export"
         const val KEY_BOOSTS = "boosts"
         const val KEY_VILLAGE = "village"
+        const val KEY_HOME_STAR = "home_star_at"
+        const val KEY_BUILDER_STAR = "builder_star_at"
     }
 }
